@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Thu Oct 20 14:14:20 2022
+
+@author: mahon
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Wed Oct 19 14:18:19 2022
 
 @author: mahon
@@ -9,12 +16,11 @@ import pandas
 import matplotlib.pyplot as plt
 
 #Univariate time series data
-dataset = pandas.read_csv(r'C:\Users\mahon\Documents\Python Scripts\NN Practice\SP500.csv', engine='python')
+dataset = pandas.read_csv(r'C:\Users\mahon\Documents\Python Scripts\NN Practice\Inflation_data.csv', usecols=[1], engine='python')
 dataset=dataset.values
 
-#Remove no trading days
-idx=dataset!='.'
-dataset=dataset[idx]
+dates = pandas.read_csv(r'C:\Users\mahon\Documents\Python Scripts\NN Practice\Inflation_data.csv', usecols=[0], engine='python')
+
 
 #Reshape and convert to float32 (loaded in as object type)
 dataset=dataset.reshape(len(dataset),1)
@@ -53,6 +59,9 @@ test_size=N-train_size
 train=dataset[0:train_size]
 test=dataset[train_size:N]
 
+train_dates=dataset[0:train_size]
+test_dates=dataset[train_size:N]
+
 import numpy as np
 frame=1
 
@@ -84,32 +93,22 @@ model=Sequential()
 model.add(LSTM(4,input_shape=(1,frame)))
 model.add(Dense(1))
 model.compile(loss='mean_squared_error', optimizer='adam')
-model.fit(trainX, trainY, epochs=100, batch_size=1, verbose=2)
+model.fit(trainX, trainY, epochs=100, batch_size=10, verbose=2)
 
 #Lets test it
 trainPredict = model.predict(trainX)
 testPredict = model.predict(testX)
 
-#Looks really good!
+#Looks pretty good!
 plt.plot(test)
 plt.plot(testPredict)
+plt.xlabel()
 plt.show
 
+plt.plot(train)
+plt.plot(trainPredict)
+plt.xlabel()
+plt.show
 
-# shift train predictions for plotting
-trainPredictPlot = np.empty_like(dataset)
-trainPredictPlot[:, :] = np.nan
-trainPredictPlot[frame:len(trainPredict)+frame, :] = trainPredict
-
-# shift test predictions for plotting
-testPredictPlot = np.empty_like(dataset)
-testPredictPlot[:, :] = np.nan
-testPredictPlot[len(trainPredict)+(frame*2)+1:len(dataset)-1, :] = testPredict
-
-# plot baseline and predictions
-plt.plot(scaler.inverse_transform(dataset))
-plt.plot(trainPredictPlot)
-plt.plot(testPredictPlot)
-plt.show()
 
 
